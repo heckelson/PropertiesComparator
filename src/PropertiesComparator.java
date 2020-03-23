@@ -13,23 +13,13 @@ public class PropertiesComparator {
     }
 
     private static void printHelp() {
-        System.err.println("Please provide two files.");
-        System.err.println("Usage: 'java PropertiesComparator <fileSource> <fileDest>'");
+        System.err.println("Please provide at least the bundle.properties and one bundle_XX.properties file.");
     }
 
-
-    public static void main(String[] args) {
-        File source, dest;
-
-
-        if (args.length > 0 && args[0].equals("--help")) {
-            printHelp();
-            System.exit(0);
-        }
-
+    private static void printMissingTags(String sourcePath, String destPath) {
         try {
-            source = new File(args[0]);
-            dest   = new File(args[1]);
+            File source = new File(sourcePath);
+            File dest   = new File(destPath);
 
             if (!source.getName().endsWith(".properties") || !dest.getName().endsWith("properties")) {
                 throw new FileBadException();
@@ -87,6 +77,27 @@ public class PropertiesComparator {
         catch (Exception e) {
             e.printStackTrace();
         }
+    }
 
+    public static void main(String[] args) {
+        Set<File> filesToCompare = new HashSet<>();
+
+        File files = new File(".");
+        if(files.list().length > 0) {
+            for (String filename : files.list()) {
+
+                if (filename.startsWith("bundle_") && filename.endsWith(".properties")) {
+                    filesToCompare.add(new File(filename));
+                }
+
+            }
+
+
+            for (File file : filesToCompare) {
+                System.out.println("========== " + file.getName() + " ==========");
+                printMissingTags(args[0], file.getName());
+                System.out.println();
+            }
+        }
     }
 }
